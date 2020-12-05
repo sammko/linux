@@ -1,10 +1,10 @@
-linux-4.19 (4.19.160-2~deb9u1) UNRELEASED; urgency=high
+linux-4.19 (4.19.160-2~deb9u1) stretch-security; urgency=high
 
   * Rebuild for stretch:
     - Change ABI number to 0.bpo.13
     - debian/bin/gencontrol.py: Replace another f-string with use of str.format
 
- -- Ben Hutchings <benh@debian.org>  Sat, 05 Dec 2020 22:11:41 +0100
+ -- Ben Hutchings <benh@debian.org>  Sat, 05 Dec 2020 22:21:46 +0100
 
 linux (4.19.160-2) buster; urgency=medium
 
