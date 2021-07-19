@@ -1,3 +1,26 @@
+linux-4.19 (4.19.194-3~deb9u1) stretch-security; urgency=high
+
+  * Rebuild for stretch; no further changes required
+
+ -- Ben Hutchings <benh@debian.org>  Mon, 19 Jul 2021 19:44:32 +0200
+
+linux (4.19.194-3) buster-security; urgency=high
+
+  * [x86] KVM: SVM: Periodically schedule when unregistering regions on destroy
+    (CVE-2020-36311)
+  * can: bcm: fix infoleak in struct bcm_msg_head (CVE-2021-34693)
+  * can: bcm: delay release of struct bcm_op after synchronize_rcu()
+    (CVE-2021-3609)
+  * seq_file: Disallow extremely large seq buffer allocations (CVE-2021-33909)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Sun, 18 Jul 2021 08:52:00 +0200
+
+linux (4.19.194-2) buster; urgency=medium
+
+  * proc: Track /proc/$pid/attr/ opener mm_struct (Closes: #990072)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Mon, 21 Jun 2021 10:46:20 +0200
+
 linux-4.19 (4.19.194-1~deb9u1) stretch-security; urgency=high
 
   * Rebuild for stretch:
