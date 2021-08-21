@@ -1205,14 +1205,18 @@ static int ucsi_init(struct ucsi *ucsi)
 	ucsi->ntfy = UCSI_ENABLE_NTFY_CMD_COMPLETE | UCSI_ENABLE_NTFY_ERROR;
 	command = UCSI_SET_NOTIFICATION_ENABLE | ucsi->ntfy;
 	ret = ucsi_send_command(ucsi, command, NULL, 0);
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(ucsi->dev, "failed to enable basic notifications\n");
 		goto err_reset;
+	}
 
 	/* Get PPM capabilities */
 	command = UCSI_GET_CAPABILITY;
 	ret = ucsi_send_command(ucsi, command, &ucsi->cap, sizeof(ucsi->cap));
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(ucsi->dev, "failed to get PPM capabilities\n");
 		goto err_reset;
+	}
 
 	if (!ucsi->cap.num_connectors) {
 		ret = -ENODEV;
@@ -1230,16 +1234,20 @@ static int ucsi_init(struct ucsi *ucsi)
 	/* Register all connectors */
 	for (i = 0; i < ucsi->cap.num_connectors; i++) {
 		ret = ucsi_register_port(ucsi, i);
-		if (ret)
+		if (ret) {
+			dev_err(ucsi->dev, "failed to register port\n");
 			goto err_unregister;
+		}
 	}
 
 	/* Enable all notifications */
 	ucsi->ntfy = UCSI_ENABLE_NTFY_ALL;
 	command = UCSI_SET_NOTIFICATION_ENABLE | ucsi->ntfy;
 	ret = ucsi_send_command(ucsi, command, NULL, 0);
-	if (ret < 0)
+	if (ret < 0) {
+		dev_err(ucsi->dev, "failed to enable all notifications\n");
 		goto err_unregister;
+	}
 
 	return 0;
 
