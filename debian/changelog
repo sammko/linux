@@ -1,3 +1,10 @@
+linux (5.14.9-2~bpo11+1) bullseye-backports; urgency=medium
+
+  * Rebuild for bullseye-backports:
+    - Change ABI number to 0.bpo.2
+
+ -- Ben Hutchings <benh@debian.org>  Sun, 10 Oct 2021 13:33:55 +0200
+
 linux (5.14.9-2) unstable; urgency=medium
 
   * [amd64] Unset AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT.
