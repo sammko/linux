@@ -812,29 +812,47 @@ is_sp_stage(struct ia_css_pipeline_stage *stage)
 	return stage->sp_func != IA_CSS_PIPELINE_NO_FUNC;
 }
 
-static int
-configure_isp_from_args(
-    const struct sh_css_sp_pipeline *pipeline,
-    const struct ia_css_binary      *binary,
-    const struct sh_css_binary_args *args,
-    bool two_ppc,
-    bool deinterleaved)
+static int configure_isp_from_args(const struct sh_css_sp_pipeline *pipeline,
+				   const struct ia_css_binary      *binary,
+				   const struct sh_css_binary_args *args,
+				   bool				   two_ppc,
+				   bool				   deinterleaved)
 {
-	ia_css_fpn_configure(binary,  &binary->in_frame_info);
-	ia_css_crop_configure(binary, &args->delay_frames[0]->info);
-	ia_css_qplane_configure(pipeline, binary, &binary->in_frame_info);
-	ia_css_output0_configure(binary, &args->out_frame[0]->info);
-	ia_css_output1_configure(binary, &args->out_vf_frame->info);
-	ia_css_copy_output_configure(binary, args->copy_output);
-	ia_css_output0_configure(binary, &args->out_frame[0]->info);
-#ifdef ISP2401
-	ia_css_sc_configure(binary, pipeline->shading.internal_frame_origin_x_bqs_on_sctbl,
-			    pipeline->shading.internal_frame_origin_y_bqs_on_sctbl);
-#endif
-	ia_css_iterator_configure(binary, &args->in_frame->info);
-	ia_css_dvs_configure(binary, &args->out_frame[0]->info);
-	ia_css_output_configure(binary, &args->out_frame[0]->info);
-	ia_css_raw_configure(pipeline, binary, &args->in_frame->info, &binary->in_frame_info, two_ppc, deinterleaved);
+	int ret;
+
+	ret = ia_css_fpn_configure(binary,  &binary->in_frame_info);
+	if (ret)
+		return ret;
+	ret = ia_css_crop_configure(binary, &args->delay_frames[0]->info);
+	if (ret)
+		return ret;
+	ret = ia_css_qplane_configure(pipeline, binary, &binary->in_frame_info);
+	if (ret)
+		return ret;
+	ret = ia_css_output0_configure(binary, &args->out_frame[0]->info);
+	if (ret)
+		return ret;
+	ret = ia_css_output1_configure(binary, &args->out_vf_frame->info);
+	if (ret)
+		return ret;
+	ret = ia_css_copy_output_configure(binary, args->copy_output);
+	if (ret)
+		return ret;
+	ret = ia_css_output0_configure(binary, &args->out_frame[0]->info);
+	if (ret)
+		return ret;
+	ret = ia_css_iterator_configure(binary, &args->in_frame->info);
+	if (ret)
+		return ret;
+	ret = ia_css_dvs_configure(binary, &args->out_frame[0]->info);
+	if (ret)
+		return ret;
+	ret = ia_css_output_configure(binary, &args->out_frame[0]->info);
+	if (ret)
+		return ret;
+	ret = ia_css_raw_configure(pipeline, binary, &args->in_frame->info, &binary->in_frame_info, two_ppc, deinterleaved);
+	if (ret)
+		return ret;
 
 	/*
 	 * FIXME: args->delay_frames can be NULL here
@@ -846,10 +864,13 @@ configure_isp_from_args(
 	 * without crashing, but the pipeline should likely be built without
 	 * adding it at the first place (or there are a hidden bug somewhere)
 	 */
-	ia_css_ref_configure(binary, args->delay_frames, pipeline->dvs_frame_delay);
-	ia_css_tnr_configure(binary, args->tnr_frames);
-	ia_css_bayer_io_config(binary, args);
-	return 0;
+	ret = ia_css_ref_configure(binary, args->delay_frames, pipeline->dvs_frame_delay);
+	if (ret)
+		return ret;
+	ret = ia_css_tnr_configure(binary, args->tnr_frames);
+	if (ret)
+		return ret;
+	return ia_css_bayer_io_config(binary, args);
 }
 
 static void
@@ -1311,24 +1332,6 @@ sh_css_sp_init_pipeline(struct ia_css_pipeline *me,
 						   &sh_css_sp_group.pipe[thread_id].output_frame_queue_id));
 	}
 #endif
-
-	if (IS_ISP2401) {
-		/* For the shading correction type 1 (the legacy shading table conversion in css is not used),
-		* the parameters are passed to the isp for the shading table centering.
-		*/
-		if (internal_frame_origin_bqs_on_sctbl &&
-		    params && params->shading_settings.enable_shading_table_conversion == 0) {
-			sh_css_sp_group.pipe[thread_id].shading.internal_frame_origin_x_bqs_on_sctbl
-			= (uint32_t)internal_frame_origin_bqs_on_sctbl->x;
-			sh_css_sp_group.pipe[thread_id].shading.internal_frame_origin_y_bqs_on_sctbl
-			= (uint32_t)internal_frame_origin_bqs_on_sctbl->y;
-		} else {
-			sh_css_sp_group.pipe[thread_id].shading.internal_frame_origin_x_bqs_on_sctbl =
-			0;
-			sh_css_sp_group.pipe[thread_id].shading.internal_frame_origin_y_bqs_on_sctbl =
-			0;
-		}
-	}
 
 	IA_CSS_LOG("pipe_id %d port_config %08x",
 		   pipe_id, sh_css_sp_group.pipe[thread_id].inout_port_config);
